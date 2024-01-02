@@ -1,0 +1,38 @@
+--- 3.separate_operations.cc	2024-01-02 15:53:47.887731817 +0100
++++ 4.hoist_to_fns.cc	2024-01-02 15:53:49.439732918 +0100
+@@ -3,21 +3,29 @@
+ 
+ class Solution {
+   public:
+-    int helper(int num, std::vector<int> &nums) {
+-        // Now that we know there are two distinct operations,
+-        // we can separate them further:
+ 
++    // We know these are distinct operations, so we can move these to separate
++    // functions for easier analysis:
++
++    int left_product(size_t excluded_index, std::vector<int> &nums) {
+         int left_product = 1;
+-        for (size_t i = 0; i < num; ++i) {
++        for (size_t i = 0; i < excluded_index; ++i) {
+             left_product *= nums[i];
+         }
++        return left_product;
++    }
+ 
++    int right_product(size_t excluded_index, std::vector<int> &nums) {
+         int right_product = 1;
+-        for (size_t i = num + 1; i < nums.size(); ++i) {
++        for (size_t i = excluded_index + 1; i < nums.size(); ++i) {
+             right_product *= nums[i];
+         }
++        return right_product;
++    }
+ 
+-        return left_product * right_product;
++    int helper(size_t excluded_index, std::vector<int> &nums) {
++        return left_product(excluded_index, nums) *
++               right_product(excluded_index, nums);
+     }
+ 
+     // Opcount: n*(n - 1) multiplications. O(n^2)

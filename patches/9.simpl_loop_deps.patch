@@ -1,0 +1,72 @@
+--- 8.inline.cc	2024-01-02 16:16:55.469696418 +0100
++++ 9.simpl_loop_deps.cc	2024-01-02 16:29:02.129056022 +0100
+@@ -4,41 +4,45 @@
+ 
+ class Solution {
+   public:
+-    // We've already reached the target efficiency: O(n).
+-    // From here we'll be reducing & simplifying the code so that we get more
+-    // performance, which means reducing the constants that come before the
+-    // `n`s. Some of these can be automatically done by compilers, others
+-    // require human intervention since they're about changing data structures,
+-    // not just reordering code.
+-
+-    // Our first step will be inlining our helper functions to understand how
+-    // our loops behave. This way we can understand better direct dependencies
+-    // between variables.
+-
+     // Opcount: n lefts + n rights + n left*rights = 3n. O(n).
+-    // Space: n left products + n right products + n results = 3n. O(n).
++    // Space: n left products + n right products + n results + 1 accum (shared
++    // between two scopes) = 3n + 1. O(n).
+     std::vector<int> productExceptSelf(std::vector<int> &nums) {
+ 
+         auto left_products = std::make_unique<int[]>(nums.size());
+ 
++        // We already know how many loop iterations apart is the last value. To
++        // help the CPU and the compiler, we'll use a local variable to track
++        // it, instead of using memory references. This way we avoid changing
++        // the memory locations we're fetching from, which boosts our cache
++        // usage.
++
+         // left: we want to process i - 1 before i
+-        for (size_t i = 0; i < nums.size(); i++) {
+-            if (i == 0) {
+-                left_products[i] = 1;
+-            } else {
+-                left_products[i] = left_products[i - 1] * nums[i - 1];
++        {
++            int accum;
++            for (size_t i = 0; i < nums.size(); i++) {
++                if (i == 0) {
++                    accum = 1;
++                } else {
++                    accum = accum * nums[i - 1];
++                }
++                left_products[i] = accum;
+             }
+         }
+ 
+         auto right_products = std::make_unique<int[]>(nums.size());
+ 
+-        // right: we want to process i + 1 before i
+-        for (size_t i = nums.size(); i > 0;) {
+-            --i;
+-            if (i == nums.size() - 1) {
+-                right_products[i] = 1;
+-            } else {
+-                right_products[i] = right_products[i + 1] * nums[i + 1];
++        {
++            // right: we want to process i + 1 before i
++            int accum;
++            for (size_t i = nums.size(); i > 0;) {
++                --i;
++                if (i == nums.size() - 1) {
++                    accum = 1;
++                } else {
++                    accum = accum * nums[i + 1];
++                }
++                right_products[i] = accum;
+             }
+         }
+ 
