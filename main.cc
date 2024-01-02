@@ -4,21 +4,20 @@
 class Solution {
   public:
     int helper(int num, std::vector<int> &nums) {
-        int product = 1;
+        // Now that we know there are two distinct operations,
+        // we can separate them further:
 
-        // By separating the loops, now we know there are two
-        // distinct operations: multiplications before and multiplications
-        // after the skipped index.
-
+        int left_product = 1;
         for (size_t i = 0; i < num; ++i) {
-            product *= nums[i];
+            left_product *= nums[i];
         }
 
+        int right_product = 1;
         for (size_t i = num + 1; i < nums.size(); ++i) {
-            product *= nums[i];
+            right_product *= nums[i];
         }
 
-        return product;
+        return left_product * right_product;
     }
 
     // Opcount: n*(n - 1) multiplications. O(n^2)
