@@ -6,10 +6,18 @@ class Solution {
     int helper(int num, std::vector<int> &nums) {
         int product = 1;
 
-        for (size_t i = 0; i < nums.size(); i++) {
-            if (i != num)
-                product *= nums[i];
+        // By separating the loops, now we know there are two
+        // distinct operations: multiplications before and multiplications
+        // after the skipped index.
+
+        for (size_t i = 0; i < num; ++i) {
+            product *= nums[i];
         }
+
+        for (size_t i = num + 1; i < nums.size(); ++i) {
+            product *= nums[i];
+        }
+
         return product;
     }
 
