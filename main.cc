@@ -11,21 +11,17 @@ class Solution {
 
         auto left_products = std::make_unique<int[]>(nums.size());
 
-        // We already know how many loop iterations apart is the last value. To
-        // help the CPU and the compiler, we'll use a local variable to track
-        // it, instead of using memory references. This way we avoid changing
-        // the memory locations we're fetching from, which boosts our cache
-        // usage.
+        // These two loops use an if that only triggers in the first iteration,
+        // and the rest always flow through the `else`s. Let's remove those
+        // branches! We'll also propagate the initial value for `accum`, and
+        // simplify `a = a * b` to `a *= b`.
 
         // left: we want to process i - 1 before i
         {
-            int accum;
-            for (size_t i = 0; i < nums.size(); i++) {
-                if (i == 0) {
-                    accum = 1;
-                } else {
-                    accum = accum * nums[i - 1];
-                }
+            int accum = 1;
+            left_products[0] = 1;
+            for (size_t i = 1; i < nums.size(); i++) {
+                accum *= nums[i - 1];
                 left_products[i] = accum;
             }
         }
@@ -34,14 +30,11 @@ class Solution {
 
         {
             // right: we want to process i + 1 before i
-            int accum;
-            for (size_t i = nums.size(); i > 0;) {
+            int accum = 1;
+            right_products[nums.size() - 1] = 1;
+            for (size_t i = nums.size() - 1; i > 0;) {
                 --i;
-                if (i == nums.size() - 1) {
-                    accum = 1;
-                } else {
-                    accum = accum * nums[i + 1];
-                }
+                accum *= nums[i + 1];
                 right_products[i] = accum;
             }
         }
